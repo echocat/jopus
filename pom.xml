@@ -1,0 +1,200 @@
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ **** BEGIN LICENSE BLOCK *****
+  ~
+  ~ Version: MPL 2.0
+  ~
+  ~ echocat JOpus, Copyright (c) 2014 echocat
+  ~
+  ~ This Source Code Form is subject to the terms of the Mozilla Public
+  ~ License, v. 2.0. If a copy of the MPL was not distributed with this
+  ~ file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  ~
+  ~ **** END LICENSE BLOCK *****
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.echocat</groupId>
+    <artifactId>jopus</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>echocat JOpus</name>
+    <packaging>nar</packaging>
+    <url>https://github.com/echocat/jopus</url>
+    <description>Java binding to native opus encoder/decoder.</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.opusVersion>1.1</project.opusVersion>
+        <version.org.echocat.jomon>1.4.3</version.org.echocat.jomon>
+    </properties>
+
+    <licenses>
+        <license>
+            <name>Mozilla Public License 2.0</name>
+            <url>http://www.mozilla.org/MPL/2.0</url>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>echocat</name>
+        <url>https://echocat.org/</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <name>Gregor Noczinski</name>
+            <id>gregor.noczinski</id>
+            <email>gregor@noczinski.eu</email>
+        </developer>
+    </developers>
+
+    <build>
+        <defaultGoal>integration-test</defaultGoal>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.github.maven-nar</groupId>
+                    <artifactId>nar-maven-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.3.2</version>
+                    <configuration>
+                        <source>1.7</source>
+                        <target>1.7</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.16</version>
+                <configuration>
+                    <forkMode>once</forkMode>
+                    <useFile>false</useFile>
+                    <systemProperties>
+                        <java.library.path>${project.build.directory}${file.separator}nar${file.separator}${project.artifactId}-${project.version}-amd64-Windows-msvc-jni${file.separator}lib${file.separator}amd64-Windows-msvc${file.separator}jni</java.library.path>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.maven-nar</groupId>
+                <artifactId>nar-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <output>${project.artifactId}</output>
+                    <!-- architecture>x86</architecture -->
+                    <linker>
+                        <options>
+                            <option>/LTCG</option>
+                            <option>/DEBUG</option>
+                            <option>/OPT:REF</option>
+                            <option>/OPT:ICF</option>
+                        </options>
+                    </linker>
+                    <runtime>static</runtime>
+                    <libraries>
+                        <library>
+                            <type>jni</type>
+                        </library>
+                    </libraries>
+                    <c>
+                        <defines>
+                            <define>USE_ALLOCA=1</define>
+                            <define>OPUS_BUILD=1</define>
+                            <define>__SSE__=1</define>
+                            <define>PACKAGE_VERSION=\"${project.opusVersion}\"</define>
+                        </defines>
+                        <includes>
+                            <include>c/*.c</include>
+                            <include>c/ogg/*.c</include>
+                            <include>c/opus/*.c</include>
+                            <include>c/opus/celt/*.c</include>
+                            <include>c/opus/celt/x86/*.c</include>
+                            <include>c/opus/silk/*.c</include>
+                            <include>c/opus/silk/float/*.c</include>
+                            <include>c/opus-tools/*.c</include>
+                        </includes>
+                        <excludes>
+                            <exclude>c/opus/opus_demo.c</exclude>
+                        </excludes>
+                        <includePaths>
+                            <includePath>${env.JAVA_HOME}/include</includePath>
+
+                            <includePath>${basedir}/src/main/c</includePath>
+                            <includePath>${basedir}/src/main/c/ogg</includePath>
+                            <includePath>${basedir}/src/main/c/opus</includePath>
+                            <includePath>${basedir}/src/main/c/opus/celt</includePath>
+                            <includePath>${basedir}/src/main/c/opus/celt/x86</includePath>
+                            <includePath>${basedir}/src/main/c/opus/silk</includePath>
+                            <includePath>${basedir}/src/main/c/opus/silk/float</includePath>
+                            <includePath>${basedir}/src/main/c/opus-tools</includePath>
+
+                            <includePath>${basedir}/src/main/include</includePath>
+                            <includePath>${basedir}/src/main/include/ogg</includePath>
+                            <includePath>${basedir}/src/main/include/opus</includePath>
+                        </includePaths>
+                        <debug>true</debug>
+                        <options>
+                            <option>/FS</option>
+                            <option>/Zi</option>
+                            <option>/Fd${project.artifactId}.pdb</option>
+                            <option>/GR</option>
+                            <option>/Gm</option>
+                            <option>/GL</option>
+                            <option>/Ox</option>
+                            <option>/Qpar</option>
+                        </options>
+                    </c>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.echocat.jomon</groupId>
+            <artifactId>runtime</artifactId>
+            <version>${version.org.echocat.jomon}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.echocat.jomon</groupId>
+            <artifactId>testing</artifactId>
+            <version>${version.org.echocat.jomon}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/echocat/jopus/issues</url>
+    </issueManagement>
+
+    <repositories>
+        <repository>
+            <id>echocat</id>
+            <url>http://repo.echocat.org/all</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>echocat</id>
+            <url>http://repo.echocat.org/all</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <scm>
+        <connection>scm:git:git@github.com:echocat/jopus.git</connection>
+        <developerConnection>scm:git:git@github.com:echocat/jopus.git</developerConnection>
+        <url>https://github.com/echocat/jopus</url>
+        <tag>HEAD</tag>
+    </scm>
+
+</project>

@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="sources" pattern="file[jopus]:*/&amp;&amp;!file[jopus]:src/main/c/ogg//*&amp;&amp;!file[jopus]:src/main/c/opus//*&amp;&amp;!file[jopus]:src/main/c/opus-tools//*&amp;&amp;!file[jopus]:src/main/include/ogg//*&amp;&amp;!file[jopus]:src/main/include/opus//*" />
+</component>

@@ -1,0 +1,9 @@
+<component name="CopyrightManager">
+  <copyright>
+    <option name="notice" value="**** BEGIN LICENSE BLOCK *****&#10;&#10;Version: MPL 2.0&#10;&#10;&amp;#36;project.name, Copyright (c) #if(&amp;#36;today.year &lt;= 2014)&amp;#36;today.year#else&amp;#36;!{null}2014-&amp;#36;today.year#end&amp;#36;!{null} echocat&#10;&#10;This Source Code Form is subject to the terms of the Mozilla Public&#10;License, v. 2.0. If a copy of the MPL was not distributed with this&#10;file, You can obtain one at http://mozilla.org/MPL/2.0/.&#10;&#10;**** END LICENSE BLOCK *****" />
+    <option name="keyword" value="Copyright" />
+    <option name="allowReplaceKeyword" value="" />
+    <option name="myName" value="echocat" />
+    <option name="myLocal" value="true" />
+  </copyright>
+</component>
