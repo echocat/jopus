@@ -19,7 +19,7 @@ public abstract class OggJNISupport {
     protected OggJNISupport() {}
 
     static {
-        System.loadLibrary("cpp-test");
+        System.loadLibrary("jopus");
         init();
     }
 

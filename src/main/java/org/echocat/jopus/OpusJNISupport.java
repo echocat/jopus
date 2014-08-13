@@ -19,7 +19,7 @@ import org.echocat.jogg.OggJNISupport;
 class OpusJNISupport extends OggJNISupport {
 
     static {
-        System.loadLibrary("cpp-test");
+        System.loadLibrary("jopus");
     }
 
 }
