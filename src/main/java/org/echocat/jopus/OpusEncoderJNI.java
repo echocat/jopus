@@ -14,7 +14,8 @@
 
 package org.echocat.jopus;
 
-final class OpusEncoderJNI extends OpusJNISupport {
+// TODO this is just temporarily public
+public final class OpusEncoderJNI extends OpusJNISupport {
 
     private OpusEncoderJNI() {
     }
@@ -58,7 +59,8 @@ final class OpusEncoderJNI extends OpusJNISupport {
      *                   {@link #setBitRate} to control the bitrate.
      * @return The length of the encoded packet (in bytes).
      */
-    static native int encode(long encoderHandle, short[] pcm, int frameSize, byte[] packet, int packetLength);
+    // TODO this is just temporarily public
+    public static native int encode(long encoderHandle, short[] pcm, int frameSize, byte[] packet, int packetLength);
 
     /**
      * Encodes an Opus frame from floating point input.
