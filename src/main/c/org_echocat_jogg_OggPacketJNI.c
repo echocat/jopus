@@ -33,9 +33,6 @@ JNIEXPORT void JNICALL Java_org_echocat_jogg_OggPacketJNI_destroy
 
     ogg_packet* packet = (ogg_packet*) handle;
 
-    if (packet->packet != NULL) {
-        free((void*)packet->packet);
-    }
     free((void*)packet);
 }
 
