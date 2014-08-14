@@ -14,6 +14,13 @@
 
 package org.echocat.jopus;
 
+import org.echocat.jogg.OggPacket;
+import org.echocat.jogg.OggSyncStateOutput;
+
+import java.io.Closeable;
+import java.io.IOException;
+
+import static org.echocat.jogg.OggPacket.packetFor;
 import static org.echocat.jopus.Application.audio;
 import static org.echocat.jopus.Bandwidth.bandwidthFor;
 import static org.echocat.jopus.FrameSize.frameSizeFor;
@@ -25,7 +32,7 @@ import static org.echocat.jopus.Signal.signalFor;
 import static org.echocat.jopus.Vbr.vbrFor;
 import static org.echocat.jopus.VbrConstraint.vbrConstraintFor;
 
-public class OpusEncoder {
+public class OpusEncoder implements Closeable {
 
     private static final int MAXIMUM_NUMBER_OF_SUPPORTED_CHANNELS = 255;
     private static final int MAXIMUM_COMPLEXITY = 10;
@@ -34,6 +41,9 @@ public class OpusEncoder {
     private static final int MAXIMUM_PACKET_LOSS_PERC = 100;
     private static final int MINIMUM_LSB_DEPTH = 8;
     private static final int MAXIMUM_LSB_DEPTH = 24;
+    private OpusComments _comments;
+    private boolean _metadataProcessed;
+
 
     public static int getMaximumNumberOfSupportedChannels() {
         return MAXIMUM_NUMBER_OF_SUPPORTED_CHANNELS;
@@ -63,17 +73,18 @@ public class OpusEncoder {
         return MAXIMUM_LSB_DEPTH;
     }
 
-    // TODO this is just temporarily public
-    public final long _handle;
+    private final long _handle;
     private SamplingRate _samplingRate;
     private int _numberOfChannels;
     private Application _application;
+    private OggPacket _lastPacket;
+    private OggSyncStateOutput _sso;
 
-    public OpusEncoder() {
-        this(kHz48, 2, audio);
+    public OpusEncoder(OggSyncStateOutput sso) {
+        this(kHz48, 2, audio, sso);
     }
 
-    public OpusEncoder(SamplingRate samplingRate, int numberOfChannels, Application application) {
+    public OpusEncoder(SamplingRate samplingRate, int numberOfChannels, Application application, OggSyncStateOutput sso) {
         validateSamplingRate(samplingRate);
         validateNumberOfChannels(numberOfChannels);
         validateApplication(application);
@@ -82,6 +93,46 @@ public class OpusEncoder {
         _numberOfChannels = numberOfChannels;
         _application = application;
         _handle = create(samplingRate.handle(), numberOfChannels, application.handle());
+        _lastPacket = null;
+        _metadataProcessed = false;
+        _sso = sso;
+    }
+
+    public void write(int numberOfFrames, short[] pcm) throws IOException {
+        if (!_metadataProcessed){
+            processMetadata();
+        }
+        OggPacket packet = encodeAndWrite(numberOfFrames, pcm);
+        _sso.write(packet);
+    }
+
+    private void processMetadata() throws IOException {
+        final OpusHeader header = getOpusHeader();
+
+        _sso.write(packetFor(header)
+                .packetno(0)
+                .bos(true)
+        );
+
+        _sso.write(packetFor(_comments)
+                .bos(false)
+                .eos(false)
+                .packetno(1)
+        );
+
+        _metadataProcessed = true;
+    }
+
+    private OggPacket encodeAndWrite(int numberOfFrames, short[] pcm) throws IOException {
+        final byte[] packet = new byte[pcm.length * 2];
+        final int encoded = encode(_handle, pcm, numberOfFrames, packet, packet.length);
+
+        OggPacket currentPacket = packetFor(packet, 0, encoded)
+            .packetno(_lastPacket != null ? _lastPacket.getPacketno() + 1 : 2)
+            .granulepos(_lastPacket != null ? _lastPacket.getGranulepos() + numberOfFrames : numberOfFrames);
+
+        _lastPacket = currentPacket;
+        return currentPacket;
     }
 
     protected void reinitialize() {
@@ -104,6 +155,14 @@ public class OpusEncoder {
         validateApplication(application);
         _application = application;
         reinitialize();
+    }
+
+    public void setComments(OpusComments comments) {
+        _comments = comments;
+    }
+
+    public OpusComments getComments() {
+        return _comments;
     }
 
     public SamplingRate getSamplingRate() {
@@ -344,6 +403,19 @@ public class OpusEncoder {
         return OpusEncoderJNI.getFinalRange(_handle);
     }
 
+    private OpusHeader getOpusHeader() {
+        final OpusHeader header = new OpusHeader();
+        header.setGain(0);
+        header.setVersion(1);
+        header.setChannels(getNumberOfChannels());
+        header.setInputSampleRate(getSamplingRate().handle());
+        header.setNbStreams(1);
+        header.setNbCoupled(1);
+        header.setChannelMapping(0);
+        header.setPreskip(0);
+        return header;
+    }
+
     @Override
     public String toString() {
         return "OpusEncoder{samplingRate: " + getSamplingRate() + ", channels=" + getNumberOfChannels() + ", application=" + getApplication() + "}";
@@ -358,4 +430,8 @@ public class OpusEncoder {
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        // TODO OggHandleSupportBla?
+    }
 }

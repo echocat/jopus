@@ -14,8 +14,7 @@
 
 package org.echocat.jopus;
 
-// TODO this is just temporarily public
-public final class OpusDecoderJNI extends OpusJNISupport {
+final class OpusDecoderJNI extends OpusJNISupport {
 
     private OpusDecoderJNI() {
     }
@@ -24,8 +23,7 @@ public final class OpusDecoderJNI extends OpusJNISupport {
 
     static native void init(long decoderHandle, int samplingRateInHz, int numberOfChannels);
 
-    // TODO this is just temporarily public
-    public static native int decode(long decoderHandle, byte[] packet, int packetLength, short[] pcm, int frameSize, int decodeFec);
+    static native int decode(long decoderHandle, byte[] packet, int packetLength, short[] pcm, int frameSize, int decodeFec);
 
     static native int decodeFloat(long decoderHandle, byte[] packet, int packetLength, float[] pcm, int frameSize, int decodeFec);
 
