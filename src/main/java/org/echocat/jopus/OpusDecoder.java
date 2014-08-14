@@ -144,28 +144,26 @@ public class OpusDecoder {
 
         final StopWatch stopWatch = new StopWatch();
 
-        try (final InputStream is = new FileInputStream("foo.opus")) {
-            try (final OutputStream out = new FileOutputStream("foo2.raw")) {
-                try (final OggSyncStateInput ssi = new OggSyncStateInput(is)) {
-                    while (!ssi.isEofReached()) {
-                        final OggPageInput pageInput = ssi.read(4096);
-                        while (pageInput != null && pageInput.hasNext()) {
-                            final OggPacket packet = pageInput.next();
-                            if (header == null) {
-                                if (packet.getPacketno() != 0) {
-                                    throw new IOException("Illegal packet number. Expected was #0 but got #" + packet.getPacketno() + ".");
-                                }
-                                header = new OpusHeader();
-                                header.fromPacket(packet.getBuffer());
-                                decoder.setNumberOfChannels(header.getChannels());
-                                decoder.setSamplingRate(SamplingRate.samplingRateFor(header.getInputSampleRate()));
-                            } else if (comments == null && packet.getPacketno() == 1) {
-                                comments = new OpusComments();
-                                comments.fromPacket(packet.getBuffer());
-                            } else {
-                                decodeAndWrite(packet, decoder, numberOfFrames, header, out);
-                            }
+        try (final InputStream is = new FileInputStream("foo.opus");
+             final OggSyncStateInput ssi = new OggSyncStateInput(is);
+             final OutputStream out = new FileOutputStream("foo2.raw")) {
+            while (!ssi.isEofReached()) {
+                final OggPageInput pageInput = ssi.read(4096);
+                while (pageInput != null && pageInput.hasNext()) {
+                    final OggPacket packet = pageInput.next();
+                    if (header == null) {
+                        if (packet.getPacketno() != 0) {
+                            throw new IOException("Illegal packet number. Expected was #0 but got #" + packet.getPacketno() + ".");
                         }
+                        header = new OpusHeader();
+                        header.fromPacket(packet.getBuffer());
+                        decoder.setNumberOfChannels(header.getChannels());
+                        decoder.setSamplingRate(SamplingRate.samplingRateFor(header.getInputSampleRate()));
+                    } else if (comments == null && packet.getPacketno() == 1) {
+                        comments = new OpusComments();
+                        comments.fromPacket(packet.getBuffer());
+                    } else {
+                        decodeAndWrite(packet, decoder, numberOfFrames, header, out);
                     }
                 }
             }

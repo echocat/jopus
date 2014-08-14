@@ -357,51 +357,48 @@ public class OpusEncoder {
 
         final OpusHeader header = createHeaderFor(encoder);
 
-        try (final InputStream is = new FileInputStream("foo.raw")) {
-            try (final DataInputStream in = new DataInputStream(is)) {
-                try (final OutputStream out = new FileOutputStream("foo.opus")) {
-                    try (final OggSyncStateOutput sso = new OggSyncStateOutput(out)) {
-                        sso.write(packetFor(header)
-                                .packetno(0)
-                                .bos(true)
-                        );
+        try (final InputStream is = new FileInputStream("foo.raw");
+             final DataInputStream in = new DataInputStream(is);
+             final OutputStream out = new FileOutputStream("foo.opus");
+             final OggSyncStateOutput sso = new OggSyncStateOutput(out)) {
+            sso.write(packetFor(header)
+                    .packetno(0)
+                    .bos(true)
+            );
 
-                        sso.write(packetFor(new OpusComments(
-                                "ALBUM", "Foo",
-                                "ARTIST", "deadmau5",
-                                "DATE", "2012",
-                                "ENCODER", "opusenc from opus-tools 0.1.8",
-                                "GENRE", "Electronic",
-                                "TITLE", "Strobe",
-                                "TRACKNUMBER", "1"
-                        ))
-                                .bos(false)
-                                .eos(false)
-                                .packetno(1)
-                        );
+            sso.write(packetFor(new OpusComments(
+                    "ALBUM", "Foo",
+                    "ARTIST", "deadmau5",
+                    "DATE", "2012",
+                    "ENCODER", "opusenc from opus-tools 0.1.8",
+                    "GENRE", "Electronic",
+                    "TITLE", "Strobe",
+                    "TRACKNUMBER", "1"
+                ))
+                    .bos(false)
+                    .eos(false)
+                    .packetno(1)
+            );
 
-                        final StopWatch stopWatch = new StopWatch();
-                        final short[] pcm = new short[numberOfFrames * numberOfChannels];
-                        final byte[] buffer = new byte[pcm.length * 2];
-                        OggPacket packet = null;
-                        try {
-                            //noinspection InfiniteLoopStatement
-                            for (; ; ) {
-                                in.readFully(buffer);
-                                for (int i = 0; i < pcm.length; i++) {
-                                    pcm[i] = (short) ((buffer[i * 2] & 0xff) | (buffer[i * 2 + 1] << 8));
-                                }
-                                packet = encodeAndWrite(encoder, numberOfFrames, pcm, packet);
-                                sso.write(packet);
-                            }
-                        } catch (final EOFException ignored) {
-                        }
-
-                        //noinspection UseOfSystemOutOrSystemErr
-                        System.out.println("Tooks " + stopWatch.getCurrentDuration() + ".");
+            final StopWatch stopWatch = new StopWatch();
+            final short[] pcm = new short[numberOfFrames * numberOfChannels];
+            final byte[] buffer = new byte[pcm.length * 2];
+            OggPacket packet = null;
+            try {
+                //noinspection InfiniteLoopStatement
+                for (; ; ) {
+                    in.readFully(buffer);
+                    for (int i = 0; i < pcm.length; i++) {
+                        pcm[i] = (short) ((buffer[i * 2] & 0xff) | (buffer[i * 2 + 1] << 8));
                     }
+                    packet = encodeAndWrite(encoder, numberOfFrames, pcm, packet);
+                    sso.write(packet);
                 }
+            } catch (final EOFException ignored) {
             }
+
+            //noinspection UseOfSystemOutOrSystemErr
+            System.out.println("Tooks " + stopWatch.getCurrentDuration() + ".");
         }
     }
 
