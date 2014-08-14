@@ -78,9 +78,7 @@
                 <configuration>
                     <forkMode>once</forkMode>
                     <useFile>false</useFile>
-                    <systemProperties>
-                        <java.library.path>${project.build.directory}${file.separator}nar${file.separator}${project.artifactId}-${project.version}-amd64-Windows-msvc-jni${file.separator}lib${file.separator}amd64-Windows-msvc${file.separator}jni</java.library.path>
-                    </systemProperties>
+                    <argLine>-Djava.library.path=${project.build.directory}${file.separator}nar${file.separator}${project.artifactId}-${project.version}-amd64-Windows-msvc-jni${file.separator}lib${file.separator}amd64-Windows-msvc${file.separator}jni</argLine>
                 </configuration>
             </plugin>
             <plugin>
