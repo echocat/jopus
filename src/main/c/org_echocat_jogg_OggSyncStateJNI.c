@@ -81,9 +81,6 @@ JNIEXPORT void JNICALL Java_org_echocat_jogg_OggSyncStateJNI_wrote
         if (sourceLength > (state->storage - state->fill)) {
             jclass type = (*env)->FindClass(env, "org/echocat/jogg/OggSyncStateException");
             (*env)->ThrowNew(env, type, "The size of the given array is larger then the one that was produced by buffer().");
-        } else if (sourceLength > length) {
-            jclass type = (*env)->FindClass(env, "org/echocat/jogg/OggSyncStateException");
-            (*env)->ThrowNew(env, type, "The size of bytes that are wrote back is larger then the bytes of the given source.");
         } else {
             jbyte* nsource = (*env)->GetByteArrayElements(env, source, 0);
             if (nsource != NULL) {
