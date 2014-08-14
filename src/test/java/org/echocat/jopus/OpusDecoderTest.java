@@ -12,11 +12,13 @@
  * *** END LICENSE BLOCK *****
  ****************************************************************************************/
 
+package org.echocat.jopus;
+
 import org.echocat.jogg.OggSyncStateInput;
-import org.echocat.jopus.OpusDecoder;
 import org.junit.Test;
 
 import java.io.*;
+
 
 /**
  * Created by christian.rijke on 14.08.2014.
@@ -30,7 +32,7 @@ public class OpusDecoderTest {
              final OpusDecoder od = new OpusDecoder(ssi);
              final OutputStream out = new FileOutputStream("foo2.raw")) {
             while (!od.isEofReached()) {
-                byte[] read = od.read();
+                final byte[] read = od.read();
                 if (read != null) {
                     out.write(read);
                 }

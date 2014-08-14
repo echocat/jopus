@@ -12,7 +12,8 @@
  * *** END LICENSE BLOCK *****
  ****************************************************************************************/
 
-import org.echocat.jogg.OggSyncStateOutput;
+package org.echocat.jogg;
+
 import org.echocat.jopus.OpusComments;
 import org.echocat.jopus.OpusEncoder;
 import org.junit.Test;
@@ -34,7 +35,7 @@ public class OpusEncoderTest {
              final OggSyncStateOutput sso = new OggSyncStateOutput(out);
              final OpusEncoder oe = new OpusEncoder(sso)) {
 
-            OpusComments opusComments = new OpusComments(
+            final OpusComments opusComments = new OpusComments(
                 "ALBUM", "Foo",
                 "ARTIST", "deadmau5",
                 "DATE", "2012",
