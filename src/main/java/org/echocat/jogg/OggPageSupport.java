@@ -99,7 +99,7 @@ public abstract class OggPageSupport extends OggHandleBasedSupport {
     @Override
     protected void destroyHandle(long handle) {
         try {
-            OggSyncStateJNI.destroy(_streamStateHandle);
+            OggStreamStateJNI.destroy(_streamStateHandle);
         } finally {
             OggPageJNI.destroy(handle);
         }
