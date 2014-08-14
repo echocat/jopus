@@ -87,6 +87,12 @@
                 <groupId>com.github.maven-nar</groupId>
                 <artifactId>nar-maven-plugin</artifactId>
                 <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <id>default-nar-javah</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
                 <configuration>
                     <output>${project.artifactId}</output>
                     <!-- architecture>x86</architecture -->
@@ -126,6 +132,7 @@
                         </excludes>
                         <includePaths>
                             <includePath>${env.JAVA_HOME}/include</includePath>
+                            <includePath>${env.JAVA_HOME}/include/win32</includePath>
 
                             <includePath>${basedir}/src/main/c</includePath>
                             <includePath>${basedir}/src/main/c/ogg</includePath>
@@ -148,7 +155,6 @@
                             <option>/GR</option>
                             <option>/Gm</option>
                             <option>/GL</option>
-                            <option>/Ox</option>
                             <option>/Qpar</option>
                         </options>
                     </c>
