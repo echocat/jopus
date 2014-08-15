@@ -18,14 +18,13 @@ import org.echocat.jogg.OggPacket;
 import org.echocat.jogg.OggPageInput;
 import org.echocat.jogg.OggSyncStateInput;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 import static org.echocat.jopus.Bandwidth.bandwidthFor;
 import static org.echocat.jopus.OpusDecoderJNI.*;
 import static org.echocat.jopus.SamplingRate.kHz48;
 
-public class OpusDecoder implements Closeable {
+public class OpusDecoder extends OpusHandleBasedSupport {
 
     private static final int MAXIMUM_NUMBER_OF_SUPPORTED_CHANNELS = 255;
     private static final int MINIMUM_GAIN = -32768;
@@ -46,24 +45,23 @@ public class OpusDecoder implements Closeable {
         return MAXIMUM_GAIN;
     }
 
-    private final long _handle;
     private SamplingRate _samplingRate;
     private int _numberOfChannels;
-    private OggSyncStateInput _ssi;
+    private final OggSyncStateInput _ssi;
     private boolean _metadataProcessed;
-    private byte[] buf;
+    private byte[] _buf;
 
     public OpusDecoder(OggSyncStateInput ssi) {
         this(kHz48, 2, ssi);
     }
 
     public OpusDecoder(SamplingRate samplingRate, int numberOfChannels, OggSyncStateInput ssi) {
+        super(create(samplingRate.handle(), numberOfChannels));
         validateSamplingRate(samplingRate);
         validateNumberOfChannels(numberOfChannels);
 
         _samplingRate = samplingRate;
         _numberOfChannels = numberOfChannels;
-        _handle = create(samplingRate.handle(), numberOfChannels);
         _ssi = ssi;
         _metadataProcessed = false;
     }
@@ -74,15 +72,15 @@ public class OpusDecoder implements Closeable {
         }
 
         // return buffered data;
-        byte[] result = buf;
+        final byte[] result = _buf;
 
         // store next packet in internal buffer
         if (!isEofReached()) {
-            OggPacket nextPacket = getNextPacket();
+            final OggPacket nextPacket = getNextPacket();
             if (nextPacket != null) {
-                buf = decode(nextPacket);
+                _buf = decode(nextPacket);
             } else {
-                buf = null;
+                _buf = null;
             }
         }
         return result;
@@ -104,7 +102,7 @@ public class OpusDecoder implements Closeable {
         OggPacket packet = getNextPacket();
         assertPacketIndex(packet, 0);
 
-        OpusHeader header = new OpusHeader();
+        final OpusHeader header = new OpusHeader();
         header.fromPacket(packet.getBuffer());
         setNumberOfChannels(header.getChannels());
         setSamplingRate(SamplingRate.samplingRateFor(header.getInputSampleRate()));
@@ -112,10 +110,10 @@ public class OpusDecoder implements Closeable {
         packet = getNextPacket();
         assertPacketIndex(packet, 1);
 
-        OpusComments comments = new OpusComments();
+        final OpusComments comments = new OpusComments();
         comments.fromPacket(packet.getBuffer());
 
-        buf = getNextPacket().getBuffer();
+        _buf = getNextPacket().getBuffer();
 
         _metadataProcessed = true;
     }
@@ -129,7 +127,7 @@ public class OpusDecoder implements Closeable {
     private byte[] decode(OggPacket packet) throws IOException {
         final byte[] buffer = packet.getBuffer();
         final short[] pcm = new short[NUMBER_OF_FRAMES * getNumberOfChannels()];
-        final int pcmLength = OpusDecoderJNI.decode(_handle, buffer, buffer.length, pcm, NUMBER_OF_FRAMES, 0);
+        final int pcmLength = OpusDecoderJNI.decode(handle(), buffer, buffer.length, pcm, NUMBER_OF_FRAMES, 0);
 
         final byte[] outBuffer = new byte[pcmLength * 2];
         for (int i = 0; i < pcmLength; i++) {
@@ -142,7 +140,7 @@ public class OpusDecoder implements Closeable {
 
     private void reinitialize() {
         synchronized (this) {
-            init(_handle, _samplingRate.handle(), _numberOfChannels);
+            init(handle(), _samplingRate.handle(), _numberOfChannels);
         }
     }
 
@@ -179,27 +177,27 @@ public class OpusDecoder implements Closeable {
     }
 
     public Bandwidth getBandwidth() {
-        return bandwidthFor(OpusDecoderJNI.getBandwidth(_handle));
+        return bandwidthFor(OpusDecoderJNI.getBandwidth(handle()));
     }
 
     public int getLookAhead() {
-        return OpusDecoderJNI.getLookAhead(_handle);
+        return OpusDecoderJNI.getLookAhead(handle());
     }
 
     public int getFinalRange() {
-        return OpusDecoderJNI.getFinalRange(_handle);
+        return OpusDecoderJNI.getFinalRange(handle());
     }
 
     public int getLastPacketDuration() {
-        return OpusDecoderJNI.getLastPacketDuration(_handle);
+        return OpusDecoderJNI.getLastPacketDuration(handle());
     }
 
     public int getPitch() {
-        return OpusDecoderJNI.getPitch(_handle);
+        return OpusDecoderJNI.getPitch(handle());
     }
 
     public int getGain() {
-        return OpusDecoderJNI.getGain(_handle);
+        return OpusDecoderJNI.getGain(handle());
     }
 
     protected void validateGain(int value) {
@@ -212,7 +210,7 @@ public class OpusDecoder implements Closeable {
 
     public void setGain(int value) {
         validateGain(value);
-        OpusDecoderJNI.setGain(_handle, value);
+        OpusDecoderJNI.setGain(handle(), value);
     }
 
     @Override
@@ -221,20 +219,11 @@ public class OpusDecoder implements Closeable {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        try {
-            destroy(_handle);
-        } finally {
-            super.finalize();
-        }
-    }
-
-    @Override
-    public void close() throws IOException {
-        // TODO OggHandleBlaSupport?
+    protected void destroyHandle(long handle) {
+        destroy(handle());
     }
 
     public boolean isEofReached() {
-        return _ssi.isEofReached() && buf == null;
+        return _ssi.isEofReached() && _buf == null;
     }
 }

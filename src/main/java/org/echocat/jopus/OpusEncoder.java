@@ -17,7 +17,6 @@ package org.echocat.jopus;
 import org.echocat.jogg.OggPacket;
 import org.echocat.jogg.OggSyncStateOutput;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 import static org.echocat.jogg.OggPacket.packetFor;
@@ -32,7 +31,7 @@ import static org.echocat.jopus.Signal.signalFor;
 import static org.echocat.jopus.Vbr.vbrFor;
 import static org.echocat.jopus.VbrConstraint.vbrConstraintFor;
 
-public class OpusEncoder implements Closeable {
+public class OpusEncoder extends OpusHandleBasedSupport {
 
     private static final int MAXIMUM_NUMBER_OF_SUPPORTED_CHANNELS = 255;
     private static final int MAXIMUM_COMPLEXITY = 10;
@@ -73,18 +72,18 @@ public class OpusEncoder implements Closeable {
         return MAXIMUM_LSB_DEPTH;
     }
 
-    private final long _handle;
     private SamplingRate _samplingRate;
     private int _numberOfChannels;
     private Application _application;
     private OggPacket _lastPacket;
-    private OggSyncStateOutput _sso;
+    private final OggSyncStateOutput _sso;
 
     public OpusEncoder(OggSyncStateOutput sso) {
         this(kHz48, 2, audio, sso);
     }
 
     public OpusEncoder(SamplingRate samplingRate, int numberOfChannels, Application application, OggSyncStateOutput sso) {
+        super(create(samplingRate.handle(), numberOfChannels, application.handle()));
         validateSamplingRate(samplingRate);
         validateNumberOfChannels(numberOfChannels);
         validateApplication(application);
@@ -92,7 +91,6 @@ public class OpusEncoder implements Closeable {
         _samplingRate = samplingRate;
         _numberOfChannels = numberOfChannels;
         _application = application;
-        _handle = create(samplingRate.handle(), numberOfChannels, application.handle());
         _lastPacket = null;
         _metadataProcessed = false;
         _sso = sso;
@@ -102,7 +100,7 @@ public class OpusEncoder implements Closeable {
         if (!_metadataProcessed){
             processMetadata();
         }
-        OggPacket packet = encodeAndWrite(numberOfFrames, pcm);
+        final OggPacket packet = encodeAndWrite(numberOfFrames, pcm);
         _sso.write(packet);
     }
 
@@ -125,9 +123,9 @@ public class OpusEncoder implements Closeable {
 
     private OggPacket encodeAndWrite(int numberOfFrames, short[] pcm) throws IOException {
         final byte[] packet = new byte[pcm.length * 2];
-        final int encoded = encode(_handle, pcm, numberOfFrames, packet, packet.length);
+        final int encoded = encode(handle(), pcm, numberOfFrames, packet, packet.length);
 
-        OggPacket currentPacket = packetFor(packet, 0, encoded)
+        final OggPacket currentPacket = packetFor(packet, 0, encoded)
             .packetno(_lastPacket != null ? _lastPacket.getPacketno() + 1 : 2)
             .granulepos(_lastPacket != null ? _lastPacket.getGranulepos() + numberOfFrames : numberOfFrames);
 
@@ -137,7 +135,7 @@ public class OpusEncoder implements Closeable {
 
     protected void reinitialize() {
         synchronized (this) {
-            init(_handle, _samplingRate.handle(), _numberOfChannels, _application.handle());
+            init(handle(), _samplingRate.handle(), _numberOfChannels, _application.handle());
         }
     }
 
@@ -198,7 +196,7 @@ public class OpusEncoder implements Closeable {
     }
 
     public int getComplexity() {
-        return OpusEncoderJNI.getComplexity(_handle);
+        return OpusEncoderJNI.getComplexity(handle());
     }
 
     protected void validateComplexity(int value) {
@@ -210,11 +208,11 @@ public class OpusEncoder implements Closeable {
 
     public void setComplexity(int value) {
         validateComplexity(value);
-        OpusEncoderJNI.setComplexity(_handle, value);
+        OpusEncoderJNI.setComplexity(handle(), value);
     }
 
     public int getBitRate() {
-        return OpusEncoderJNI.getBitRate(_handle);
+        return OpusEncoderJNI.getBitRate(handle());
     }
 
     protected void validateBitRate(int value) {
@@ -227,11 +225,11 @@ public class OpusEncoder implements Closeable {
 
     public void setBitRate(int value) {
         validateBitRate(value);
-        OpusEncoderJNI.setBitRate(_handle, value);
+        OpusEncoderJNI.setBitRate(handle(), value);
     }
 
     public Vbr getVbr() {
-        return vbrFor(OpusEncoderJNI.getVbr(_handle));
+        return vbrFor(OpusEncoderJNI.getVbr(handle()));
     }
 
     protected void validateVbr(Vbr value) {
@@ -242,11 +240,11 @@ public class OpusEncoder implements Closeable {
 
     public void setVbr(Vbr value) {
         validateVbr(value);
-        OpusEncoderJNI.setVbr(_handle, value.handle());
+        OpusEncoderJNI.setVbr(handle(), value.handle());
     }
 
     public VbrConstraint getVbrConstraint() {
-        return vbrConstraintFor(OpusEncoderJNI.getVbrConstraint(_handle));
+        return vbrConstraintFor(OpusEncoderJNI.getVbrConstraint(handle()));
     }
 
     protected void validateVbrConstraint(VbrConstraint value) {
@@ -257,11 +255,11 @@ public class OpusEncoder implements Closeable {
 
     public void setVbrConstraint(VbrConstraint value) {
         validateVbrConstraint(value);
-        OpusEncoderJNI.setVbrConstraint(_handle, value.handle());
+        OpusEncoderJNI.setVbrConstraint(handle(), value.handle());
     }
 
     public Integer getForceChannels() {
-        final int result = OpusEncoderJNI.getBitRate(_handle);
+        final int result = OpusEncoderJNI.getBitRate(handle());
         return result == AUTO ? null : result;
     }
 
@@ -274,11 +272,11 @@ public class OpusEncoder implements Closeable {
 
     public void setForceChannels(Integer value) {
         validateBitRate(value);
-        OpusEncoderJNI.setForceChannels(_handle, value == null ? AUTO : value);
+        OpusEncoderJNI.setForceChannels(handle(), value == null ? AUTO : value);
     }
 
     public Bandwidth getMaximumBandwidth() {
-        return bandwidthFor(OpusEncoderJNI.getMaxBandwidth(_handle));
+        return bandwidthFor(OpusEncoderJNI.getMaxBandwidth(handle()));
     }
 
     protected void validateMaximumBandwidth(Bandwidth value) {
@@ -287,11 +285,11 @@ public class OpusEncoder implements Closeable {
 
     public void setMaximumBandwidth(Bandwidth value) {
         validateMaximumBandwidth(value);
-        OpusEncoderJNI.setMaxBandwidth(_handle, value.handle());
+        OpusEncoderJNI.setMaxBandwidth(handle(), value.handle());
     }
 
     public Bandwidth getBandwidth() {
-        return bandwidthFor(OpusEncoderJNI.getBandwidth(_handle));
+        return bandwidthFor(OpusEncoderJNI.getBandwidth(handle()));
     }
 
     protected void validateBandwidth(Bandwidth value) {
@@ -302,11 +300,11 @@ public class OpusEncoder implements Closeable {
 
     public void setBandwidth(Bandwidth value) {
         validateBandwidth(value);
-        OpusEncoderJNI.setBandwidth(_handle, value.handle());
+        OpusEncoderJNI.setBandwidth(handle(), value.handle());
     }
 
     public Signal getSignal() {
-        return signalFor(OpusEncoderJNI.getSignal(_handle));
+        return signalFor(OpusEncoderJNI.getSignal(handle()));
     }
 
     protected void validateSignal(Signal value) {
@@ -317,24 +315,24 @@ public class OpusEncoder implements Closeable {
 
     public void setSignal(Signal value) {
         validateSignal(value);
-        OpusEncoderJNI.setSignal(_handle, value.handle());
+        OpusEncoderJNI.setSignal(handle(), value.handle());
     }
 
     public int getLookAhead() {
-        return OpusEncoderJNI.getLookAhead(_handle);
+        return OpusEncoderJNI.getLookAhead(handle());
     }
 
     public void setUseInBandFec(boolean value) {
-        OpusEncoderJNI.setInBandFec(_handle, value ? 1 : 0);
+        OpusEncoderJNI.setInBandFec(handle(), value ? 1 : 0);
     }
 
     public boolean isUseInBandFec() {
-        final int value = OpusEncoderJNI.getInBandFec(_handle);
+        final int value = OpusEncoderJNI.getInBandFec(handle());
         return value != 0;
     }
 
     public int getPacketLossPerc() {
-        return OpusEncoderJNI.getPacketLossPerc(_handle);
+        return OpusEncoderJNI.getPacketLossPerc(handle());
     }
 
     protected void validatePacketLossPerc(int value) {
@@ -346,20 +344,20 @@ public class OpusEncoder implements Closeable {
 
     public void setPacketLossPerc(int value) {
         validatePacketLossPerc(value);
-        OpusEncoderJNI.setPacketLossPerc(_handle, value);
+        OpusEncoderJNI.setPacketLossPerc(handle(), value);
     }
 
     public void setUseDtx(boolean value) {
-        OpusEncoderJNI.setDtx(_handle, value ? 1 : 0);
+        OpusEncoderJNI.setDtx(handle(), value ? 1 : 0);
     }
 
     public boolean isUseDtx() {
-        final int value = OpusEncoderJNI.getDtx(_handle);
+        final int value = OpusEncoderJNI.getDtx(handle());
         return value != 0;
     }
 
     public int getLsbDepth() {
-        return OpusEncoderJNI.getLsbDepth(_handle);
+        return OpusEncoderJNI.getLsbDepth(handle());
     }
 
     protected void validateLsbDepth(int value) {
@@ -372,11 +370,11 @@ public class OpusEncoder implements Closeable {
 
     public void setLsbDepth(int value) {
         validateLsbDepth(value);
-        OpusEncoderJNI.setLsbDepth(_handle, value);
+        OpusEncoderJNI.setLsbDepth(handle(), value);
     }
 
     public FrameSize getExpertFrameDuration() {
-        return frameSizeFor(OpusEncoderJNI.getExpertFrameDuration(_handle));
+        return frameSizeFor(OpusEncoderJNI.getExpertFrameDuration(handle()));
     }
 
     protected void validateExpertFrameDuration(FrameSize value) {
@@ -387,20 +385,20 @@ public class OpusEncoder implements Closeable {
 
     public void setExpertFrameDuration(FrameSize value) {
         validateExpertFrameDuration(value);
-        OpusEncoderJNI.setExpertFrameDuration(_handle, value.handle());
+        OpusEncoderJNI.setExpertFrameDuration(handle(), value.handle());
     }
 
     public void setUsePrediction(boolean value) {
-        OpusEncoderJNI.setPredictionDisabled(_handle, value ? 0 : 1);
+        OpusEncoderJNI.setPredictionDisabled(handle(), value ? 0 : 1);
     }
 
     public boolean isUsePrediction() {
-        final int value = OpusEncoderJNI.getPredictionDisabled(_handle);
+        final int value = OpusEncoderJNI.getPredictionDisabled(handle());
         return value == 0;
     }
 
     public int getFinalRange() {
-        return OpusEncoderJNI.getFinalRange(_handle);
+        return OpusEncoderJNI.getFinalRange(handle());
     }
 
     private OpusHeader getOpusHeader() {
@@ -422,16 +420,8 @@ public class OpusEncoder implements Closeable {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        try {
-            destroy(_handle);
-        } finally {
-            super.finalize();
-        }
+    protected void destroyHandle(long handle) {
+        destroy(handle());
     }
 
-    @Override
-    public void close() throws IOException {
-        // TODO OggHandleSupportBla?
-    }
 }
