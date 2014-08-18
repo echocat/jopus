@@ -25,7 +25,8 @@ public class OggSyncStateInput extends OggSyncStateSupport {
     private final InputStream _delegate;
     private final OggPageInput _pageInputState = new OggPageInput();
 
-    private boolean _checkNext;
+    private static final int BUFFER_READ_LENGTH = 4096;
+
     private boolean _eof;
 
     public OggSyncStateInput(InputStream delegate) {
@@ -35,23 +36,26 @@ public class OggSyncStateInput extends OggSyncStateSupport {
         _delegate = delegate;
     }
 
-    public OggPageInput read(int count) throws IOException {
+    public OggPageInput read() throws IOException {
         assertNotDestroyed();
         assertNotEof();
 
-        OggPageInput result = _checkNext ? tryPageout() : null;
-        if (result == null) {
-            final byte[] bitStreamBuffer = buffer(handle(), count);
-            final int bitStreamRead = _delegate.read(bitStreamBuffer);
-            if (bitStreamRead >= 0) {
-                _checkNext = true;
-                wrote(handle(), bitStreamBuffer, bitStreamRead);
-                result = tryPageout();
-            } else {
-                _eof = true;
-                _checkNext = false;
+        OggPageInput result = null;
+
+        while (result == null || isEofReached()) {
+            result = tryPageout();
+
+            if (result == null) {
+                final byte[] bitStreamBuffer = buffer(handle(), BUFFER_READ_LENGTH);
+                final int bitStreamRead = _delegate.read(bitStreamBuffer);
+                if (bitStreamRead >= 0) {
+                    wrote(handle(), bitStreamBuffer, bitStreamRead);
+                } else {
+                    _eof = true;
+                }
             }
         }
+
         return result;
     }
 
