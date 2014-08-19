@@ -31,7 +31,7 @@ public class OpusDecoder extends OpusHandleBasedSupport {
     private static final int MAXIMUM_GAIN = 32767;
 
     private static final int NUMBER_OF_FRAMES = 2880;
-    private static final int BUFFER_LENGTH = 4096;
+
 
     public static int getMaximumNumberOfSupportedChannels() {
         return MAXIMUM_NUMBER_OF_SUPPORTED_CHANNELS;
@@ -47,9 +47,10 @@ public class OpusDecoder extends OpusHandleBasedSupport {
 
     private SamplingRate _samplingRate;
     private int _numberOfChannels;
+
     private final OggSyncStateInput _ssi;
     private boolean _metadataProcessed;
-    private byte[] _buf;
+    private OggPageInput _currentPage;
 
     public OpusDecoder(OggSyncStateInput ssi) {
         this(kHz48, 2, ssi);
@@ -63,6 +64,7 @@ public class OpusDecoder extends OpusHandleBasedSupport {
         _samplingRate = samplingRate;
         _numberOfChannels = numberOfChannels;
         _ssi = ssi;
+        _currentPage = _ssi.next();
         _metadataProcessed = false;
     }
 
@@ -71,29 +73,18 @@ public class OpusDecoder extends OpusHandleBasedSupport {
             processMetadata();
         }
 
-        // return buffered data;
-        final byte[] result = _buf;
-
-        // store next packet in internal buffer
-        if (!isEofReached()) {
-            final OggPacket nextPacket = getNextPacket();
-            if (nextPacket != null) {
-                _buf = decode(nextPacket);
-            } else {
-                _buf = null;
-            }
-        }
-        return result;
+        return decode(getNextPacket());
     }
 
     private OggPacket getNextPacket() throws IOException {
-        OggPacket packet = null;
-        if (!_ssi.isEofReached()) {
-            final OggPageInput pageInput = _ssi.read(BUFFER_LENGTH);
-
-            if (pageInput != null && pageInput.hasNext()) {
-                packet = pageInput.next();
-            }
+        OggPacket packet;
+        if (_currentPage.hasNext()){
+            packet = _currentPage.next();
+        } else if (_ssi.hasNext()) {
+            _currentPage = _ssi.next();
+            packet = _currentPage.next();
+        } else {
+            throw new IOException("unexpected end of stream, no more packets available");
         }
         return packet;
     }
@@ -112,8 +103,6 @@ public class OpusDecoder extends OpusHandleBasedSupport {
 
         final OpusComments comments = new OpusComments();
         comments.fromPacket(packet.getBuffer());
-
-        _buf = getNextPacket().getBuffer();
 
         _metadataProcessed = true;
     }
@@ -224,6 +213,6 @@ public class OpusDecoder extends OpusHandleBasedSupport {
     }
 
     public boolean isEofReached() {
-        return _ssi.isEofReached() && _buf == null;
+        return !_currentPage.hasNext() && !_ssi.hasNext();
     }
 }
