@@ -12,8 +12,9 @@
  * *** END LICENSE BLOCK *****
  ****************************************************************************************/
 
-package org.echocat.jogg;
+package org.echocat.jopus;
 
+import org.echocat.jogg.OggSyncStateOutput;
 import org.echocat.jopus.OpusComments;
 import org.echocat.jopus.OpusEncoder;
 import org.junit.Test;
