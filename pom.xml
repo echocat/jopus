@@ -173,6 +173,12 @@
             <version>${version.org.echocat.jomon}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+            <version>1.7.7</version>
+        </dependency>
     </dependencies>
 
     <issueManagement>
