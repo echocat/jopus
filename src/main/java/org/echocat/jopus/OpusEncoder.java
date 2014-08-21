@@ -112,6 +112,11 @@ public class OpusEncoder extends OpusHandleBasedSupport {
                 .bos(true)
         );
 
+        if (_comments == null){
+            _comments = new OpusComments();
+            _comments.add("ENCODER", "echocat jopus");
+        }
+
         _sso.write(packetFor(_comments)
                 .bos(false)
                 .eos(false)
