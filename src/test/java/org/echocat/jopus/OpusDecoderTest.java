@@ -15,9 +15,17 @@
 package org.echocat.jopus;
 
 import org.echocat.jogg.OggSyncStateInput;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 
 /**
@@ -25,12 +33,38 @@ import java.io.*;
  */
 public class OpusDecoderTest {
 
+    Logger LOG = LoggerFactory.getLogger(OpusDecoderTest.class);
+
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
+
+
     @Test
-    public void decodeOpusFileToRawFile() throws IOException {
-        try (final InputStream is = new FileInputStream("foo.opus");
+    public void decodeMono() throws IOException {
+        File result = decode("bach_48k_mono.opus", 1, SamplingRate.kHz48);
+        assertThat(result.length(), is(1023360L));
+    }
+
+    @Test
+    public void decodeStereo() throws IOException {
+        File result = decode("bach_48k_stereo.opus", 2, SamplingRate.kHz48);
+        // TODO fix decoding
+       fail();
+    }
+
+    public File decode(String source, int channels, SamplingRate samplingRate) throws IOException {
+        LOG.info("decoding {}...", source);
+
+        File tempFile = tempFolder.newFile(source.substring(0, source.length() - 5) + ".raw");
+
+        try (final InputStream is = getClass().getResourceAsStream(source);
              final OggSyncStateInput ssi = new OggSyncStateInput(is);
              final OpusDecoder od = new OpusDecoder(ssi);
-             final OutputStream out = new FileOutputStream("foo2.raw")) {
+             final OutputStream out = new FileOutputStream(tempFile)) {
+
+            od.setSamplingRate(samplingRate);
+            od.setNumberOfChannels(channels);
+
             while (!od.isEofReached()) {
                 final byte[] read = od.read();
                 if (read != null) {
@@ -38,5 +72,7 @@ public class OpusDecoderTest {
                 }
             }
         }
+        LOG.info("decoding finished");
+        return tempFile;
     }
 }
