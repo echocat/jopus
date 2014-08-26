@@ -60,15 +60,15 @@ public class OpusDecoderTest {
         try (final InputStream is = getClass().getResourceAsStream(source);
              final OggSyncStateInput ssi = new OggSyncStateInput(is);
              final OpusDecoder od = new OpusDecoder(ssi);
-             final OutputStream out = new FileOutputStream(tempFile)) {
+             final FileOutputStream fos = new FileOutputStream(tempFile);
+             final DataOutputStream dos = new DataOutputStream(fos)) {
 
             od.setSamplingRate(samplingRate);
             od.setNumberOfChannels(channels);
 
             while (!od.isEofReached()) {
-                final byte[] read = od.read();
-                if (read != null) {
-                    out.write(read);
+                for (short i : od.read()) {
+                    dos.writeShort(i);
                 }
             }
         }

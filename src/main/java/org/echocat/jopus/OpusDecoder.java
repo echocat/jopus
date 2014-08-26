@@ -19,6 +19,7 @@ import org.echocat.jogg.OggPageInput;
 import org.echocat.jogg.OggSyncStateInput;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.echocat.jopus.Bandwidth.bandwidthFor;
 import static org.echocat.jopus.OpusDecoderJNI.*;
@@ -68,7 +69,7 @@ public class OpusDecoder extends OpusHandleBasedSupport {
         _metadataProcessed = false;
     }
 
-    public byte[] read() throws IOException {
+    public short[] read() throws IOException {
         if (!_metadataProcessed) {
             processMetadata();
         }
@@ -113,18 +114,11 @@ public class OpusDecoder extends OpusHandleBasedSupport {
         }
     }
 
-    private byte[] decode(OggPacket packet) throws IOException {
+    private short[] decode(OggPacket packet) throws IOException {
         final byte[] buffer = packet.getBuffer();
         final short[] pcm = new short[NUMBER_OF_FRAMES * getNumberOfChannels()];
         final int pcmLength = OpusDecoderJNI.decode(handle(), buffer, buffer.length, pcm, NUMBER_OF_FRAMES, 0);
-
-        final byte[] outBuffer = new byte[pcmLength * 2];
-        for (int i = 0; i < pcmLength; i++) {
-            final short val = pcm[i];
-            outBuffer[(i * 2)] = (byte) (val);
-            outBuffer[(i * 2) + 1] = (byte) (val >>> 8);
-        }
-        return outBuffer;
+        return Arrays.copyOfRange(pcm, 0, pcmLength);
     }
 
     private void reinitialize() {
