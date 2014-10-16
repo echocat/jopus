@@ -82,7 +82,7 @@
                     <forkMode>once</forkMode>
                     <useFile>false</useFile>
                     <argLine>
-                        -Djava.library.path=${project.build.directory}${file.separator}nar${file.separator}${project.artifactId}-${project.version}-amd64-Windows-msvc-jni${file.separator}lib${file.separator}amd64-Windows-msvc${file.separator}jni
+                        -Djava.library.path=${project.build.directory}${file.separator}nar${file.separator}jogg-${project.version}-${architecture}-jni${file.separator}lib${file.separator}${architecture}${file.separator}jni;${project.build.directory}${file.separator}nar${file.separator}jopus-${project.version}-${architecture}-jni${file.separator}lib${file.separator}${architecture}${file.separator}jni
                     </argLine>
                 </configuration>
             </plugin>
