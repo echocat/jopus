@@ -27,6 +27,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.opusVersion>1.1</project.opusVersion>
+        <architecture>x86-Windows-msvc</architecture>
+        <version.org.echocat.jogg>1.0-SNAPSHOT</version.org.echocat.jogg>
         <version.org.echocat.jomon>1.4.3</version.org.echocat.jomon>
         <version.java>1.8</version.java>
     </properties>
@@ -120,7 +122,6 @@
                         </defines>
                         <includes>
                             <include>c/*.c</include>
-                            <include>c/ogg/*.c</include>
                             <include>c/opus/*.c</include>
                             <include>c/opus/celt/*.c</include>
                             <include>c/opus/celt/x86/*.c</include>
@@ -136,7 +137,6 @@
                             <includePath>${env.JAVA_HOME}/include/win32</includePath>
 
                             <includePath>${basedir}/src/main/c</includePath>
-                            <includePath>${basedir}/src/main/c/ogg</includePath>
                             <includePath>${basedir}/src/main/c/opus</includePath>
                             <includePath>${basedir}/src/main/c/opus/celt</includePath>
                             <includePath>${basedir}/src/main/c/opus/celt/x86</includePath>
@@ -145,7 +145,6 @@
                             <includePath>${basedir}/src/main/c/opus-tools</includePath>
 
                             <includePath>${basedir}/src/main/include</includePath>
-                            <includePath>${basedir}/src/main/include/ogg</includePath>
                             <includePath>${basedir}/src/main/include/opus</includePath>
                         </includePaths>
                         <debug>true</debug>
@@ -165,6 +164,12 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.echocat</groupId>
+            <artifactId>jogg</artifactId>
+            <version>${version.org.echocat.jogg}</version>
+            <type>nar</type>
+        </dependency>
         <dependency>
             <groupId>org.echocat.jomon</groupId>
             <artifactId>runtime</artifactId>

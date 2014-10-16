@@ -17,7 +17,7 @@
 
 #include <jni.h>
 #include <stdio.h>
-#include <ogg.h>
+#include <ogg/ogg.h>
 
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>

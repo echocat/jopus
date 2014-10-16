@@ -8,6 +8,7 @@
         <option name="STATIC_FIELD_NAME_PREFIX" value="c_" />
         <option name="GENERATE_FINAL_LOCALS" value="true" />
         <option name="INSERT_INNER_CLASS_IMPORTS" value="true" />
+        <option name="RIGHT_MARGIN" value="160" />
         <option name="JD_ALIGN_PARAM_COMMENTS" value="false" />
         <option name="JD_ALIGN_EXCEPTION_COMMENTS" value="false" />
         <option name="JD_P_AT_EMPTY_LINES" value="false" />
@@ -21,7 +22,6 @@
         <option name="HTML_SPACE_INSIDE_EMPTY_TAG" value="true" />
         <option name="HTML_DO_NOT_INDENT_CHILDREN_OF" value="html" />
         <option name="JSP_PREFER_COMMA_SEPARATED_IMPORT_LIST" value="true" />
-        <option name="RIGHT_MARGIN" value="160" />
         <option name="WRAP_COMMENTS" value="true" />
         <XML>
           <option name="XML_KEEP_BLANK_LINES" value="1" />
@@ -80,7 +80,6 @@
           <option name="PARENT_SETTINGS_INSTALLED" value="true" />
         </codeStyleSettings>
         <codeStyleSettings language="PHP">
-          <option name="WRAP_COMMENTS" value="true" />
           <option name="PARENT_SETTINGS_INSTALLED" value="true" />
         </codeStyleSettings>
       </value>
