@@ -60,7 +60,7 @@
                 <plugin>
                     <groupId>com.github.maven-nar</groupId>
                     <artifactId>nar-maven-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.2.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -137,20 +137,56 @@
                             <exclude>c/opus/opus_demo.c</exclude>
                         </excludes>
                         <includePaths>
-                            <includePath>${env.JAVA_HOME}/include</includePath>
-                            <includePath>${env.JAVA_HOME}/include/win32</includePath>
-
-                            <includePath>${basedir}/src/main/c</includePath>
-                            <includePath>${basedir}/src/main/c/opus</includePath>
-                            <includePath>${basedir}/src/main/c/opus/celt</includePath>
-                            <includePath>${basedir}/src/main/c/opus/celt/x86</includePath>
-                            <includePath>${basedir}/src/main/c/opus/silk</includePath>
-                            <includePath>${basedir}/src/main/c/opus/silk/float</includePath>
-                            <includePath>${basedir}/src/main/c/opus-tools</includePath>
-
-                            <includePath>${basedir}/src/main/include</includePath>
-                            <includePath>${basedir}/src/main/include/opus</includePath>
+                            <includePath>
+                                <path>
+                                    ${basedir}/src/main/c
+                                </path>
+                            </includePath>
+                            <includePath>
+                                <path>
+                                    ${basedir}/src/main/c/opus
+                                </path>
+                            </includePath>
+                            <includePath>
+                                <path>
+                                    ${basedir}/src/main/c/opus/celt
+                                </path>
+                            </includePath>
+                            <includePath>
+                                <path>
+                                    ${basedir}/src/main/c/opus/celt/x86
+                                </path>
+                            </includePath>
+                            <includePath>
+                                <path>
+                                    ${basedir}/src/main/c/opus/silk
+                                </path>
+                            </includePath>
+                            <includePath>
+                                <path>
+                                    ${basedir}/src/main/c/opus/silk/float
+                                </path>
+                            </includePath>
+                            <includePath>
+                                <path>
+                                    ${basedir}/src/main/c/opus-tools
+                                </path>
+                            </includePath>
+                            <includePath>
+                                <path>
+                                    ${basedir}/src/main/include
+                                </path>
+                            </includePath>
+                            <includePath>
+                                <path>
+                                    ${basedir}/src/main/include/opus
+                                </path>
+                            </includePath>
                         </includePaths>
+                        <systemIncludePaths>
+                            <systemIncludePath>${env.JAVA_HOME}/include</systemIncludePath>
+                            <systemIncludePath>${env.JAVA_HOME}/include/win32</systemIncludePath>
+                        </systemIncludePaths>
                         <debug>true</debug>
                         <options>
                             <option>/FS</option>
