@@ -71,13 +71,17 @@
                         <target>${version.java}</target>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.16</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.16</version>
                 <configuration>
                     <forkMode>once</forkMode>
                     <useFile>false</useFile>
@@ -163,29 +167,53 @@
         </plugins>
     </build>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.echocat</groupId>
+                <artifactId>jogg</artifactId>
+                <version>${version.org.echocat.jogg}</version>
+                <type>nar</type>
+            </dependency>
+            <dependency>
+                <groupId>org.echocat.jomon</groupId>
+                <artifactId>runtime</artifactId>
+                <version>${version.org.echocat.jomon}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.echocat.jomon</groupId>
+                <artifactId>testing</artifactId>
+                <version>${version.org.echocat.jomon}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <scope>test</scope>
+                <version>1.7.7</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.echocat</groupId>
             <artifactId>jogg</artifactId>
-            <version>${version.org.echocat.jogg}</version>
             <type>nar</type>
         </dependency>
         <dependency>
             <groupId>org.echocat.jomon</groupId>
             <artifactId>runtime</artifactId>
-            <version>${version.org.echocat.jomon}</version>
         </dependency>
         <dependency>
             <groupId>org.echocat.jomon</groupId>
             <artifactId>testing</artifactId>
-            <version>${version.org.echocat.jomon}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
-            <version>1.7.7</version>
         </dependency>
     </dependencies>
 
