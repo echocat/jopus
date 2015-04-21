@@ -25,7 +25,6 @@ import java.io.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 
 /**
@@ -48,8 +47,7 @@ public class OpusDecoderTest {
     @Test
     public void decodeStereo() throws IOException {
         File result = decode("bach_48k_stereo.opus", 2, SamplingRate.kHz48);
-        // TODO fix decoding
-       fail();
+        assertThat(result.length(), is(1044480L));
     }
 
     public File decode(String source, int channels, SamplingRate samplingRate) throws IOException {
