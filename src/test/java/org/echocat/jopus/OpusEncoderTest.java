@@ -45,7 +45,7 @@ public class OpusEncoderTest {
             "TRACKNUMBER", "1"
         );
         File result = encode("bach_48k_mono.wav", commments, 1, SamplingRate.kHz48);
-        assertThat(result.length(), is(73898L));
+        assertThat(result.length(), is(69524L));
     }
 
     @Test
@@ -56,7 +56,7 @@ public class OpusEncoderTest {
             "TRACKNUMBER", "1"
         );
         File result = encode("bach_48k_stereo.wav", commments, 2, SamplingRate.kHz48);
-        assertThat(result.length(), is(140784L));
+        assertThat(result.length(), is(136707L));
     }
 
     public File encode(String source, OpusComments opusComments, int channels, SamplingRate samplingRate) throws IOException {
